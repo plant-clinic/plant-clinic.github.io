@@ -868,17 +868,44 @@
           <div style="display:flex; gap:8px;">
             <input type="number" id="cvWeightVal" value="1" min="0" step="any" style="flex:1;" />
             <select id="cvWeightUnit" style="flex:1; margin-bottom:0;">
-              <option value="150">أردب قمح (150 كجم)</option>
-              <option value="157.5">أردب ذرة شامية (157.5 كجم)</option>
-              <option value="140">أردب ذرة رفيعة (140 كجم)</option>
-              <option value="44.928">قنطار (100 رطل = 44.93 كجم)</option>
-              <option value="150">قنطار قطن زهر (150 كجم)</option>
-              <option value="1000">طن</option>
-              <option value="1">كيلوجرام</option>
+<optgroup label="أردب (حسب المحصول)">
+              <option value="150" data-n="أردب القمح" selected>أردب القمح (150 كجم)</option>
+              <option value="160" data-n="أردب الفول البلدي (الدميسة)">أردب الفول البلدي (الدميسة) (160 كجم)</option>
+              <option value="75" data-n="أردب الفول السوداني بقشره">أردب الفول السوداني بقشره (75 كجم)</option>
+              <option value="155" data-n="أردب الفول السوداني بدون قشر">أردب الفول السوداني بدون قشر (155 كجم)</option>
+              <option value="160" data-n="أردب العدس الصحيح">أردب العدس الصحيح (160 كجم)</option>
+              <option value="148" data-n="أردب العدس المجروش">أردب العدس المجروش (148 كجم)</option>
+              <option value="120" data-n="أردب الشعير">أردب الشعير (120 كجم)</option>
+              <option value="140" data-n="أردب الذرة الشامية">أردب الذرة الشامية (140 كجم)</option>
+              <option value="140" data-n="أردب الذرة الرفيعة">أردب الذرة الرفيعة (140 كجم)</option>
+              <option value="155" data-n="أردب الحلبة">أردب الحلبة (155 كجم)</option>
+              <option value="150" data-n="أردب الترمس">أردب الترمس (150 كجم)</option>
+              <option value="150" data-n="أردب الحمص">أردب الحمص (150 كجم)</option>
+              <option value="120" data-n="أردب السمسم">أردب السمسم (120 كجم)</option>
+              <option value="175" data-n="أردب برسيم الحب (التقاوي)">أردب برسيم الحب (التقاوي) (175 كجم)</option>
+              <option value="122" data-n="أردب بذرة الكتان">أردب بذرة الكتان (122 كجم)</option>
+              <option value="113" data-n="أردب القرطم">أردب القرطم (113 كجم)</option>
+              <option value="67.5" data-n="أردب النخالة">أردب النخالة (67.5 كجم)</option>
+              <option value="140" data-n="أردب الفريك">أردب الفريك (140 كجم)</option>
+              <option value="120" data-n="أردب اللوبيا">أردب اللوبيا (120 كجم)</option>
+              <option value="125" data-n="أردب الأرز الأبيض">أردب الأرز الأبيض (125 كجم)</option>
+              <option value="160" data-n="أردب البسلة الناشفة">أردب البسلة الناشفة (160 كجم)</option>
+              <option value="120" data-n="أردب بذرة القطن (المستخلص)">أردب بذرة القطن (المستخلص) (120 كجم)</option>
+</optgroup>
+<optgroup label="قنطار">
+              <option value="44.928" data-n="قنطار (100 رطل)">قنطار (100 رطل) (44.928 كجم)</option>
+              <option value="157.5" data-n="قنطار قطن زهر (متري)">قنطار قطن زهر (متري) (157.5 كجم)</option>
+              <option value="50" data-n="قنطار قطن شعر (متري)">قنطار قطن شعر (متري) (50 كجم)</option>
+              <option value="45" data-n="قنطار بصل">قنطار بصل (45 كجم)</option>
+</optgroup>
+<optgroup label="وحدات عامة">
+              <option value="1000" data-n="طن">طن (1000 كجم)</option>
+              <option value="1" data-n="كيلوجرام">كيلوجرام</option>
+</optgroup>
             </select>
           </div>
           <div id="cvWeightResult" class="result-box"></div>
-          <p style="color:var(--muted); font-size:.82rem; margin-top:10px;">الفدان = 24 قيراط = 4200 م² تقريباً، والقيراط = 24 سهم. الأردب يختلف حسب المحصول. أرقام تقريبية.</p>
+          <p style="color:var(--muted); font-size:.82rem; margin-top:10px;">الفدان = 24 قيراط = 4200 م² تقريباً، والقيراط = 24 سهم. الأردب يختلف حسب المحصول: كل نوع له وزن أردب خاص. الكيلة = 1/12 أردب والويبة = 1/6 أردب (من تقسيم الأردب القديم). مصادر الأوزان: ويكيبيديا العربية (إردب) ومقال المصري الآن (مايو 2026)، وأردب القمح 150 كجم أكدته منظمة الفاو (2015). الأرقام تقريبية وتختلف أحياناً من منطقة لأخرى.</p>
         </div>
 
         <div class="card">
@@ -1729,15 +1756,23 @@
           <li><strong>متر مربع:</strong> ${fmt(m2)}</li>
           <li><strong>بالتفصيل:</strong> ${fed} فدان و ${q} قيراط و ${Math.round(s)} سهم</li></ul>`;
       }
+      const ARDEB = [["القمح", 150], ["الفول البلدي (الدميسة)", 160], ["الفول السوداني بقشره", 75], ["الفول السوداني بدون قشر", 155], ["العدس الصحيح", 160], ["العدس المجروش", 148], ["الشعير", 120], ["الذرة الشامية", 140], ["الذرة الرفيعة", 140], ["الحلبة", 155], ["الترمس", 150], ["الحمص", 150], ["السمسم", 120], ["برسيم الحب (التقاوي)", 175], ["بذرة الكتان", 122], ["القرطم", 113], ["النخالة", 67.5], ["الفريك", 140], ["اللوبيا", 120], ["الأرز الأبيض", 125], ["البسلة الناشفة", 160], ["بذرة القطن (المستخلص)", 120]];
       function weightCalc() {
+        const sel = document.getElementById("cvWeightUnit");
         const v = parseFloat(document.getElementById("cvWeightVal").value) || 0;
-        const kg = v * parseFloat(document.getElementById("cvWeightUnit").value);
-        document.getElementById("cvWeightResult").innerHTML = `<ul class="detail-list">
-          <li><strong>كيلوجرام:</strong> ${fmt(kg)}</li>
+        const kg = v * parseFloat(sel.value);
+        const opt = sel.options[sel.selectedIndex];
+        const isArdeb = (opt.dataset.n || "").indexOf("أردب") === 0;
+        const w = parseFloat(sel.value);
+        let rows = `<li><strong>كيلوجرام:</strong> ${fmt(kg)}</li>
           <li><strong>طن:</strong> ${fmt(kg / 1000)}</li>
-          <li><strong>أردب قمح:</strong> ${fmt(kg / 150)}</li>
-          <li><strong>أردب ذرة شامية:</strong> ${fmt(kg / 157.5)}</li>
-          <li><strong>قنطار (44.93 كجم):</strong> ${fmt(kg / 44.928)}</li></ul>`;
+          <li><strong>قنطار (44.93 كجم):</strong> ${fmt(kg / 44.928)}</li>`;
+        if (isArdeb) rows += `<li><strong>${opt.dataset.n} بالكيلة (÷12):</strong> ${fmt(v * 12)}</li>
+          <li><strong>${opt.dataset.n} بالويبة (÷6):</strong> ${fmt(v * 6)}</li>`;
+        rows += `<li><strong>أردب قمح:</strong> ${fmt(kg / 150)}</li>`;
+        const more = ARDEB.map(c => `<li><strong>أردب ${c[0]}:</strong> ${fmt(kg / c[1])}</li>`).join("");
+        document.getElementById("cvWeightResult").innerHTML = `<ul class="detail-list">${rows}</ul>
+          <details style="margin-top:8px;"><summary style="cursor:pointer;">يعادل بالأردب لباقي المحاصيل</summary><ul class="detail-list">${more}</ul></details>`;
       }
       // seed: [min,max,unit]; n/p/k: [min,max] وحدات (كجم عنصر) بالفدان
       const FC = {
