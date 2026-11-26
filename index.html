@@ -1258,7 +1258,7 @@
         }
         const errJson = await resp.json().catch(() => ({}));
         lastError = new Error(errJson?.error?.message || `HTTP ${resp.status}`);
-        if (resp.status === 400 || resp.status === 401 || resp.status === 403 || resp.status === 429) {
+        if (resp.status === 400 || resp.status === 401 || resp.status === 403) {
           throw lastError;
         }
       }
