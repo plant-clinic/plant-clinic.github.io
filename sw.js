@@ -1,5 +1,5 @@
-const CACHE = 'plant-clinic-v2';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './2-icon-v2-192.png', './1-icon-v2-512.png'];
+const CACHE = 'plant-clinic-v3';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './3-icon-v2-192.png', './2-icon-v2-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
