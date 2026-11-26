@@ -850,6 +850,47 @@
           </div>
         </div>
       </div>
+      <div class="grid-2" id="fieldCalcs" style="margin-top:22px;">
+        <div class="card">
+          <h3 class="card-title">📐 محوّل المساحات والوحدات</h3>
+          <label for="cvArea">المساحة</label>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="cvAreaVal" value="1" min="0" step="any" style="flex:1;" />
+            <select id="cvAreaUnit" style="flex:1; margin-bottom:0;">
+              <option value="4200">فدان</option>
+              <option value="175">قيراط</option>
+              <option value="7.2917">سهم</option>
+              <option value="1">متر مربع</option>
+            </select>
+          </div>
+          <div id="cvAreaResult" class="result-box"></div>
+          <label for="cvWeightVal" style="margin-top:16px;">الوزن / الكمية</label>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="cvWeightVal" value="1" min="0" step="any" style="flex:1;" />
+            <select id="cvWeightUnit" style="flex:1; margin-bottom:0;">
+              <option value="150">أردب قمح (150 كجم)</option>
+              <option value="157.5">أردب ذرة شامية (157.5 كجم)</option>
+              <option value="140">أردب ذرة رفيعة (140 كجم)</option>
+              <option value="44.928">قنطار (100 رطل = 44.93 كجم)</option>
+              <option value="150">قنطار قطن زهر (150 كجم)</option>
+              <option value="1000">طن</option>
+              <option value="1">كيلوجرام</option>
+            </select>
+          </div>
+          <div id="cvWeightResult" class="result-box"></div>
+          <p style="color:var(--muted); font-size:.82rem; margin-top:10px;">الفدان = 24 قيراط = 4200 م² تقريباً، والقيراط = 24 سهم. الأردب يختلف حسب المحصول. أرقام تقريبية.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🌾 التقاوي والتسميد بالفدان حسب المحصول</h3>
+          <label for="fcCrop">المحصول</label>
+          <select id="fcCrop"></select>
+          <label for="fcArea">المساحة بالفدان</label>
+          <input type="number" id="fcArea" value="1" min="0.25" step="0.25" />
+          <div id="fcResult" class="result-box"></div>
+          <p style="color:var(--muted); font-size:.82rem; margin-top:10px;">⚠️ أرقام تقريبية من نشرات مركز البحوث الزراعية ووزارة الزراعة، وتختلف حسب الصنف ونوع الأرض والمحصول السابق وميعاد الزراعة. راجع مهندسك الزراعي قبل التطبيق. لا تتضمن الحاسبة جرعات مبيدات.</p>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -1671,6 +1712,80 @@
     renderWeather();
     calcSpray();
     renderCropGuide();
+    /* ===== حاسبات حقلية: محوّل الوحدات + التقاوي والتسميد ===== */
+    (function () {
+      const fmt = (n) => (n >= 100 ? Math.round(n).toLocaleString("en-US") : (Math.round(n * 100) / 100).toString());
+      function areaCalc() {
+        const v = parseFloat(document.getElementById("cvAreaVal").value) || 0;
+        const m2 = v * parseFloat(document.getElementById("cvAreaUnit").value);
+        const fed = Math.floor(m2 / 4200 + 1e-9);
+        const rem = m2 - fed * 4200;
+        const q = Math.floor(rem / 175 + 1e-9);
+        const s = (rem - q * 175) / 7.2917;
+        document.getElementById("cvAreaResult").innerHTML = `<ul class="detail-list">
+          <li><strong>فدان:</strong> ${fmt(m2 / 4200)}</li>
+          <li><strong>قيراط:</strong> ${fmt(m2 / 175)}</li>
+          <li><strong>سهم:</strong> ${fmt(m2 / 7.2917)}</li>
+          <li><strong>متر مربع:</strong> ${fmt(m2)}</li>
+          <li><strong>بالتفصيل:</strong> ${fed} فدان و ${q} قيراط و ${Math.round(s)} سهم</li></ul>`;
+      }
+      function weightCalc() {
+        const v = parseFloat(document.getElementById("cvWeightVal").value) || 0;
+        const kg = v * parseFloat(document.getElementById("cvWeightUnit").value);
+        document.getElementById("cvWeightResult").innerHTML = `<ul class="detail-list">
+          <li><strong>كيلوجرام:</strong> ${fmt(kg)}</li>
+          <li><strong>طن:</strong> ${fmt(kg / 1000)}</li>
+          <li><strong>أردب قمح:</strong> ${fmt(kg / 150)}</li>
+          <li><strong>أردب ذرة شامية:</strong> ${fmt(kg / 157.5)}</li>
+          <li><strong>قنطار (44.93 كجم):</strong> ${fmt(kg / 44.928)}</li></ul>`;
+      }
+      // seed: [min,max,unit]; n/p/k: [min,max] وحدات (كجم عنصر) بالفدان
+      const FC = {
+        wheat: { name: "🌾 القمح", seed: [50, 70, "كجم"], n: [75, 75], p: [15, 15], k: null,
+          note: "التقاوي: 50-60 كجم للخبز بالتسطير أو العفير، وحتى 70 كجم للحراتي. النيتروجين 75 وحدة، والفوسفور 15 وحدة (100 كجم سوبر 15%).",
+          src: "نشرة 1083/2007 مركز البحوث الزراعية، vercon.sci.eg" },
+        maize: { name: "🌽 الذرة الشامية", seed: [12, 15, "كجم"], n: [120, 120], p: [30, 30], k: [24, 24],
+          note: "12 كجم للهجن الفردية و15 كجم لباقي الهجن. الفوسفور 200 كجم سوبر 15%، والبوتاسيوم 50 كجم سلفات بوتاسيوم للأصناف عالية الإنتاج أو الأراضي الخفيفة. لا تستخدم يوريا في الأراضي الرملية.",
+          src: "نشرة الذرة الشامية، مركز البحوث الزراعية، vercon.sci.eg" },
+        rice: { name: "🍚 الأرز", seed: [50, 60, "كجم"], n: [46, 69], p: [15, 15], k: null,
+          note: "التقاوي 50-60 كجم (30 كجم للشتل الآلي). النيتروجين 46-69 وحدة حسب الصنف وخصوبة الأرض، ويُضاف على دفعات. يُنصح بكبريتات الزنك مع الفوسفات.",
+          src: "التوصيات الفنية لمحصول الأرز، مركز بحوث الأرز، vercon.sci.eg" },
+        faba: { name: "🫘 الفول البلدي", seed: [60, 60, "كجم"], n: [15, 20], p: [15, 30], k: [24, 24],
+          note: "النيتروجين جرعة منشطة فقط (15 كجم في الطينية و20 في الرملية). الفوسفور 100-150 كجم سوبر 15% في الدلتا و150-200 في الصعيد والأراضي الجديدة. البوتاسيوم 50 كجم سلفات للأراضي الفقيرة فقط. يُنصح بالتلقيح بالعقدين.",
+          src: "نشرة الفول البلدي، مركز البحوث الزراعية، vercon.sci.eg" },
+        peanut: { name: "🥜 الفول السوداني", seed: [45, 50, "كجم بذرة"], n: [30, 45], p: [30, 30], k: null,
+          note: "التقاوي 45-50 كجم بذرة (أو نحو 75 كجم قرون). النيتروجين 30 وحدة في الأرض المتكررة الزراعة و45 في الفقيرة. الفوسفور 200 كجم سوبر 15%. يُفضَّل نترات الكالسيوم وقت التزهير.",
+          src: "نشرة الفول السوداني، مركز البحوث الزراعية، vercon.sci.eg" },
+        sesame: { name: "🌿 السمسم", seed: [3, 4, "كجم"], n: [30, 30], p: [15, 30], k: [24, 24],
+          note: "الفوسفور 100 كجم سوبر 15% بعد البقوليات و150 بعد النجيليات و200 في الأرض الفقيرة. البوتاسيوم 50 كجم سلفات في الأراضي القديمة. النيتروجين 30 وحدة على دفعات.",
+          src: "نشرة السمسم، مركز البحوث الزراعية، vercon.sci.eg" },
+        beet: { name: "🍬 بنجر السكر", seed: null, n: [60, 80], p: [30, 30], k: [24, 48],
+          note: "النيتروجين 60-80 وحدة في أول 90 يوماً من العمر ولا يزيد. الفوسفور 200 كجم سوبر 15%. البوتاسيوم 50-100 كجم سلفات بوتاسيوم. معدل التقاوي يتبع نوع البذرة، راجع المصنع أو المهندس.",
+          src: "نشرة بنجر السكر، vercon.sci.eg، وموقع الأهرام التعاوني agri.ahram.org.eg/News/90843.aspx" },
+        tomato: { name: "🍅 الطماطم", seed: [30, 50, "جم بذور (للشتل في صواني)"], n: null, p: null, k: null,
+          note: "30-50 جم بذور هجين تكفي فداناً عند الإنتاج في صواني. برنامج التسميد يختلف جداً بين الأرض القديمة والجديدة والتنقيط، فلم نضع رقماً موحداً. اتبع برنامج مهندسك.",
+          src: "نشرة الطماطم، مركز البحوث الزراعية، vercon.sci.eg/extpub/Tomato/TOMATO.htm" }
+      };
+      const rng = (a, f) => a[0] === a[1] ? fmt(a[0] * f) : fmt(a[0] * f) + " إلى " + fmt(a[1] * f);
+      function fcCalc() {
+        const c = FC[document.getElementById("fcCrop").value];
+        const a = parseFloat(document.getElementById("fcArea").value) || 0;
+        let h = `<ul class="detail-list">`;
+        h += c.seed ? `<li><strong>🌱 التقاوي:</strong> ${rng(c.seed, a)} ${c.seed[2]}</li>` : `<li><strong>🌱 التقاوي:</strong> غير مُدرجة لهذا المحصول</li>`;
+        if (c.n) h += `<li><strong>النيتروجين (N):</strong> ${rng(c.n, a)} كجم عنصر ≈ ${rng(c.n, a / 0.46)} كجم يوريا 46%</li>`;
+        if (c.p) h += `<li><strong>الفوسفور (P₂O₅):</strong> ${rng(c.p, a)} كجم ≈ ${rng(c.p, a / 0.15)} كجم سوبر فوسفات 15%</li>`;
+        if (c.k) h += `<li><strong>البوتاسيوم (K₂O):</strong> ${rng(c.k, a)} كجم ≈ ${rng(c.k, a / 0.48)} كجم سلفات بوتاسيوم 48%</li>`;
+        h += `</ul><p style="font-size:.85rem; margin-top:10px;">${c.note}</p><p style="color:var(--muted); font-size:.78rem; margin-top:6px;">المصدر: ${c.src}</p>`;
+        document.getElementById("fcResult").innerHTML = h;
+      }
+      const sel = document.getElementById("fcCrop");
+      Object.keys(FC).forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = FC[k].name; sel.appendChild(o); });
+      ["cvAreaVal", "cvAreaUnit"].forEach(i => document.getElementById(i).addEventListener("input", areaCalc));
+      ["cvWeightVal", "cvWeightUnit"].forEach(i => document.getElementById(i).addEventListener("input", weightCalc));
+      ["fcCrop", "fcArea"].forEach(i => document.getElementById(i).addEventListener("input", fcCalc));
+      areaCalc(); weightCalc(); fcCalc();
+    })();
+
   </script>
 </body>
   </html>
