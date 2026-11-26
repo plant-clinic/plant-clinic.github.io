@@ -550,21 +550,7 @@
             ارفع صورة واضحة للنبات، وسيقوم النظام بفحص تفاصيل الورقة والألوان والبقع والعروق بعناية لتحديد هل النبات <strong>سليم</strong>، أم <strong>نقص عنصر غذائي</strong>، أم <strong>مرض</strong>، أم <strong>حشرة/آفة</strong>، أم أن <strong>الصورة غير واضحة</strong>.
           </p>
 
-          <!-- إعداد مفتاح الذكاء الاصطناعي البصري الحقيقي (Gemini Vision API) -->
-          <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:12px 14px; margin-bottom:14px;">
-            <div style="font-weight:900; font-size:0.9rem; color:var(--primary); margin-bottom:4px;">
-              🤖 الفحص بالذكاء الاصطناعي عبر Gemini Vision
-            </div>
-            <div style="font-size:0.8rem; color:#334155; margin-bottom:8px;">
-              المنصة <strong>متصلة بالذكاء الاصطناعي تلقائياً</strong> — لا تحتاج أي إعداد. (للمطورين فقط: يمكنك إدخال مفتاح <strong>Gemini API</strong> خاص بك ليُستخدم بدلاً من مفتاح المنصة، ويُحفظ محلياً في متصفحك فقط):
-            </div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <input type="password" id="geminiApiKeyInput" placeholder="الصق مفتاح Gemini API هنا (AIzaSy...)" style="flex:1; min-width:200px; margin-bottom:0; font-size:0.84rem;" />
-              <button type="button" class="btn-primary" id="saveApiKeyBtn" style="padding:8px 14px; font-size:0.84rem; white-space:nowrap;">حفظ وربط</button>
-              <button type="button" class="btn-secondary" id="testApiKeyBtn" style="padding:8px 12px; font-size:0.84rem; white-space:nowrap;">اختبار الاتصال</button>
-            </div>
-            <div id="apiKeyStatus" style="margin-top:6px; font-size:0.82rem; font-weight:800; color:var(--muted);">✅ الفحص بالذكاء الاصطناعي متصل تلقائياً — ارفع صورة واضغط فحص.</div>
-          </div>
+
 
           <div class="upload-box" id="uploadTrigger">
             <div style="font-size:2.1rem;">📷</div>
@@ -572,6 +558,13 @@
             <div style="font-size:0.8rem; color:var(--muted);">يدعم JPG, PNG, WEBP — صوّر العرض عن قرب في إضاءة نهارية</div>
             <input type="file" id="plantImageInput" accept="image/*" hidden />
             <img id="imagePreview" class="preview-img" alt="معاينة صورة النبات" />
+          </div>
+
+          <div style="background:#fff7ed; border:1.5px solid #fdba74; border-radius:14px; padding:10px 14px; margin-top:10px; margin-bottom:14px; font-size:0.8rem; color:#7c2d12; line-height:1.7;">
+            <div style="font-weight:900; font-size:0.86rem; margin-bottom:2px;">🔒 خصوصية صورك ودقة الفحص</div>
+            <div>• تُرسل الصورة إلى خدمة <strong>Gemini من جوجل</strong> (الفئة المجانية) عبر وسيط خاص بالمنصة لإجراء الفحص، وقد تستخدم جوجل صور الفئة المجانية لتحسين خدماتها وقد تخضع لمراجعة بشرية.</div>
+            <div>• ارفع <strong>صور النباتات فقط</strong>: لا ترفع صور أشخاص أو عناوين أو أي تفاصيل شخصية أو حساسة.</div>
+            <div>• نتائج الفحص <strong>تقريبية وليست مؤكدة 100%</strong> — راجع متخصصاً زراعياً قبل استخدام أي مبيد أو علاج.</div>
           </div>
 
           <label for="photoPart">1. مكان الإصابة على النبات</label>
@@ -1091,78 +1084,15 @@
     const uploadTrigger = document.getElementById("uploadTrigger");
     const plantImageInput = document.getElementById("plantImageInput");
     const imagePreview = document.getElementById("imagePreview");
-    const apiKeyInput = document.getElementById("geminiApiKeyInput");
-    const apiKeyStatus = document.getElementById("apiKeyStatus");
     let uploadedFileName = "";
     let uploadedMimeType = "image/jpeg";
     let uploadedBase64Data = "";
 
     // Platform AI access goes through a small proxy so no API key ever appears in this page.
-    // A visitor's own key (input / localStorage) still works as a direct override.
     const PLANT_CLINIC_PROXY = "https://plant-clinic-gemini.abdoanwerr200.workers.dev";
     function getUserApiKey() {
-      return (apiKeyInput.value || localStorage.getItem("plant_clinic_gemini_key") || "").trim();
+      return (localStorage.getItem("plant_clinic_gemini_key") || "").trim();
     }
-
-    // Load saved Gemini API key if present (optional personal override)
-    const savedKey = localStorage.getItem("plant_clinic_gemini_key") || "";
-    apiKeyStatus.style.color = "var(--ok)";
-    if (savedKey) {
-      apiKeyInput.value = savedKey;
-      apiKeyStatus.textContent = "✅ الفحص بالذكاء الاصطناعي مفعّل (مفتاحك الخاص، ومفتاح المنصة احتياطي).";
-    } else {
-      apiKeyStatus.textContent = "✅ الفحص بالذكاء الاصطناعي متصل تلقائياً — ارفع صورة واضغط فحص مباشرة بدون أي إعداد.";
-    }
-
-    document.getElementById("saveApiKeyBtn").addEventListener("click", () => {
-      const k = apiKeyInput.value.trim();
-      if (k) {
-        localStorage.setItem("plant_clinic_gemini_key", k);
-        apiKeyStatus.style.color = "var(--ok)";
-        apiKeyStatus.textContent = "✅ تم حفظ مفتاحك الخاص وربط المنصة بـ Gemini! ارفع صورة واضغط فحص.";
-      } else {
-        localStorage.removeItem("plant_clinic_gemini_key");
-        apiKeyStatus.style.color = "var(--ok)";
-        apiKeyStatus.textContent = "✅ تم مسح مفتاحك الخاص — المنصة تعمل بمفتاحها المدمج تلقائياً.";
-      }
-    });
-
-    document.getElementById("testApiKeyBtn").addEventListener("click", async () => {
-      const userKey = getUserApiKey();
-      apiKeyStatus.style.color = "var(--blue)";
-      apiKeyStatus.textContent = "⏳ جاري اختبار الاتصال بـ Gemini...";
-      try {
-        const modelsToTry = ["gemini-3-flash-preview", "gemini-flash-lite-latest"];
-        let connectedModel = null;
-        for (const m of modelsToTry) {
-          const endpoint = userKey
-            ? `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(userKey)}`
-            : `${PLANT_CLINIC_PROXY}/v1beta/models/${m}:generateContent`;
-          const r = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: "رد بكلمة: متصل" }] }]
-            })
-          });
-          if (r.ok) {
-            connectedModel = m;
-            break;
-          }
-          if (r.status === 400 || r.status === 401 || r.status === 403) {
-            const errJson = await r.json().catch(() => ({}));
-            throw new Error(errJson?.error?.message || `خطأ في المفتاح أو الصلاحية (${r.status})`);
-          }
-        }
-        if (!connectedModel) throw new Error("تعذر الوصول لأي نموذج مدعوم حالياً.");
-        if (userKey) localStorage.setItem("plant_clinic_gemini_key", userKey);
-        apiKeyStatus.style.color = "var(--ok)";
-        apiKeyStatus.textContent = `✅ الاتصال ناجح ومربوط بالنموذج (${connectedModel})! المنصة جاهزة للتجربة.`;
-      } catch (e) {
-        apiKeyStatus.style.color = "var(--danger)";
-        apiKeyStatus.textContent = `❌ فشل الاتصال بـ Gemini: ${e.message}`;
-      }
-    });
 
     // Quick symptom chips toggle
     document.querySelectorAll("#quickSymptomChips .chip-btn").forEach(chip => {
@@ -1474,4 +1404,4 @@
     renderCropGuide();
   </script>
 </body>
-</html>
+  </html>
